@@ -3,11 +3,13 @@ const socket = io();
 const myFace = document.getElementById('myFace');
 const muteBtn = document.getElementById('mute');
 const cameraBtn = document.getElementById('camera');
+const mirrorBtn = document.getElementById('mirror');
 const camerasSelect = document.getElementById('cameras');
 
 let myStream;
 let muted = false;
 let cameraOff = false;
+let mirrored = false;
 
 const getCameras = async () => {
   try {
@@ -87,6 +89,19 @@ const handleCameraChange = async () => {
   await getMedia(camerasSelect.value);
 };
 
+const handleMirrorClick = () => {
+  if (mirrored) {
+    myFace.style.transform = 'rotateY(0deg)';
+    mirrorBtn.innerText = 'Mirror Mode Off';
+    mirrored = false;
+  } else {
+    myFace.style.transform = 'rotateY(180deg)';
+    mirrorBtn.innerText = 'Mirror Mode On';
+    mirrored = true;
+  }
+};
+
 muteBtn.addEventListener('click', handleMuteBtnClick);
 cameraBtn.addEventListener('click', handleCameraClick);
 camerasSelect.addEventListener('input', handleCameraChange);
+mirrorBtn.addEventListener('click', handleMirrorClick);
