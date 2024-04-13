@@ -1,5 +1,5 @@
 import http from 'http';
-import WebSocket from 'ws';
+import { Server } from 'socket.io';
 import express from 'express';
 
 const app = express();
@@ -13,13 +13,15 @@ app.get('/', (req, res) => res.render('home'));
 const handleListen = () =>
   console.log(`💫 http://localhost:${PORT}에서 서버가 실행되었습니다. 💫`);
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+
+wsServer.on('connection', (socket) => {
+  console.log(socket);
+});
+
+/* 
 const wss = new WebSocket.Server({ server });
-
-const onSocketClose = () => {
-  console.log('Disconnected from the Browser');
-};
-
 const sockets = [];
 
 wss.on('connection', (socket) => {
@@ -41,6 +43,6 @@ wss.on('connection', (socket) => {
         socket['nickname'] = message.payload;
     }
   });
-});
+}); */
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
