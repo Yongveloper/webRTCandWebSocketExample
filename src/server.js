@@ -1,5 +1,6 @@
 import http from 'http';
 import { Server } from 'socket.io';
+import { instrument } from '@socket.io/admin-ui';
 import express from 'express';
 
 const app = express();
@@ -14,7 +15,16 @@ const handleListen = () =>
   console.log(`💫 http://localhost:${PORT}에서 서버가 실행되었습니다. 💫`);
 
 const httpServer = http.createServer(app);
-const wsServer = new Server(httpServer);
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ['https://admin.socket.io'],
+    credentials: true,
+  },
+});
+
+instrument(wsServer, {
+  auth: false,
+});
 
 const publicRooms = () => {
   const {
