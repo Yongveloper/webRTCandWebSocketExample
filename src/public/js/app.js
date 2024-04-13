@@ -48,12 +48,25 @@ const handleRoomSubmit = (event) => {
   socket.emit('enter_room', roomNameInput.value, showRoom);
 };
 
+const onRoomListClick = (room) => {
+  roomName = room;
+  socket.emit('enter_room', room, showRoom);
+};
+
 roomNameForm.addEventListener('submit', handleRoomSubmit);
 nicknameForm.addEventListener('submit', handleNicknameSubmit);
 
-socket.on('welcome', (user) => addMessage(`${user} arrived!`));
+socket.on('welcome', (user, newCount) => {
+  const h4 = room.querySelector('h4');
+  h4.innerText = `${newCount} people in the Room ${roomName} `;
+  addMessage(`${user} arrived!`);
+});
 
-socket.on('bye', (left) => addMessage(`${left} left ㅠㅠ`));
+socket.on('bye', (left, newCount) => {
+  const h4 = room.querySelector('h4');
+  h4.innerText = `${newCount} people in the Room ${roomName} `;
+  addMessage(`${left} left ㅠㅠ`);
+});
 
 socket.on('new_message', addMessage);
 
@@ -65,7 +78,9 @@ socket.on('room_change', (rooms) => {
   }
   rooms.forEach((room) => {
     const li = document.createElement('li');
+    li.style.cursor = 'pointer';
     li.innerText = room;
+    li.addEventListener('click', () => onRoomListClick(room));
     roomList.append(li);
   });
 });

@@ -32,6 +32,10 @@ const publicRooms = () => {
   return publicRooms;
 };
 
+const countRooms = (roomName) => {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+};
+
 wsServer.on('connection', (socket) => {
   socket['nickname'] = 'Anon';
   socket.onAny((event) => {
@@ -40,12 +44,15 @@ wsServer.on('connection', (socket) => {
   socket.on('enter_room', (roomName, done) => {
     socket.join(roomName);
     done();
-    socket.to(roomName).emit('welcome', socket.nickname);
+    wsServer
+      .to(roomName)
+      .emit('welcome', socket.nickname, countRooms(roomName));
     wsServer.sockets.emit('room_change', publicRooms());
   });
   socket.on('disconnecting', () => {
     socket.rooms.forEach((room) =>
-      socket.to(room).emit('bye', socket.nickname)
+      // 방에서 자신을 포함한 모든 유저에게 메시지를 전달
+      wsServer.to(room).emit('bye', socket.nickname, countRooms(room) - 1)
     );
   });
   socket.on('disconnect', () => {
