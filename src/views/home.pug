@@ -15,11 +15,11 @@ html(lang="ko")
                     button Enter room
             div#call
                 div#myStream
-                    video#myFace(autoplay, palysinline, width="400", height="400")
+                    video#myFace(autoplay, playsinline, width="400", height="400")
                     button#mute Mute
                     button#camera Turn Camera Off
                     button#mirror Mirror Mode Off
                     select#cameras
-                video#peerFace(autoplay, palysinline, width="400", height="400")
+                video#peerFace(autoplay, playsinline, width="400", height="400")
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")

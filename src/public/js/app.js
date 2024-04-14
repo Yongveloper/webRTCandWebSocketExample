@@ -16,6 +16,7 @@ let cameraOff = false;
 let mirrored = false;
 let roomName = '';
 let myPeerConnection;
+let myDataChannel;
 
 const getCameras = async () => {
   try {
@@ -144,15 +145,21 @@ welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 
 // 주체에서 실행되는 코드
 socket.on('welcome', async () => {
+  myDataChannel = myPeerConnection.createDataChannel('chat');
+  myDataChannel.addEventListener('message', console.log);
+  console.log('made data channel');
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   console.log('sent the offer');
-
   socket.emit('offer', offer, roomName);
 });
 
 // 입장주체에서 실행되는 코드
 socket.on('offer', async (offer) => {
+  myPeerConnection.addEventListener('datachannel', (event) => {
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener('message', console.log);
+  });
   console.log('received the offer');
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
