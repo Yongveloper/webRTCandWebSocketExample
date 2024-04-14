@@ -139,26 +139,49 @@ welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 socket.on('welcome', async () => {
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
+  console.log('sent the offer');
+
   socket.emit('offer', offer, roomName);
 });
 
 // 입장주체에서 실행되는 코드
 socket.on('offer', async (offer) => {
+  console.log('received the offer');
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
   socket.emit('answer', answer, roomName);
+  console.log('send the answer');
 });
 
 // 주체에서 실행되는 코드
 socket.on('answer', (answer) => {
+  console.log('received the answer');
   myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on('ice', (ice) => {
+  console.log('received candidate');
+  myPeerConnection.addIceCandidate(ice);
 });
 
 // RTC Code
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener('icecandidate', handleIce);
+  myPeerConnection.addEventListener('track', handleAddStream);
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
+};
+
+const handleIce = (data) => {
+  console.log('sent candidate');
+  socket.emit('ice', data.candidate, roomName);
+};
+
+const handleAddStream = (data) => {
+  const peerFace = document.getElementById('peerFace');
+  console.log("Peer's Stream", data.streams[0]);
+  peerFace.srcObject = data.streams[0];
 };
