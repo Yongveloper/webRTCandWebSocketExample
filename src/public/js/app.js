@@ -115,17 +115,18 @@ mirrorBtn.addEventListener('click', handleMirrorClick);
 const welcome = document.getElementById('welcome');
 const welcomeForm = welcome.querySelector('form');
 
-const startMedia = async () => {
+const initCall = async () => {
   welcome.hidden = true;
   call.hidden = false;
   await getMedia();
   makeConnection();
 };
 
-const handleWelcomeSubmit = (event) => {
+const handleWelcomeSubmit = async (event) => {
   event.preventDefault();
   const input = welcomeForm.querySelector('input');
-  socket.emit('join_room', input.value, startMedia);
+  await initCall();
+  socket.emit('join_room', input.value);
   roomName = input.value;
   input.value = '';
 };
@@ -134,16 +135,24 @@ welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 
 // Socket code
 
-// 주체에서 실행
+// 주체에서 실행되는 코드
 socket.on('welcome', async () => {
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   socket.emit('offer', offer, roomName);
 });
 
-// 입장주체에서 실행
-socket.on('offer', (offer) => {
-  console.log(offer);
+// 입장주체에서 실행되는 코드
+socket.on('offer', async (offer) => {
+  myPeerConnection.setRemoteDescription(offer);
+  const answer = await myPeerConnection.createAnswer();
+  myPeerConnection.setLocalDescription(answer);
+  socket.emit('answer', answer, roomName);
+});
+
+// 주체에서 실행되는 코드
+socket.on('answer', (answer) => {
+  myPeerConnection.setRemoteDescription(answer);
 });
 
 // RTC Code
