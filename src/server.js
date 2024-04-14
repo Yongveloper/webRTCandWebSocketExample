@@ -31,6 +31,9 @@ wsServer.on('connection', (socket) => {
   socket.on('ice', (ice, roomName) => {
     socket.to(roomName).emit('ice', ice);
   });
+  socket.on('mirror_mode', (roomName) => {
+    socket.to(roomName).emit('mirror_mode');
+  });
 });
 
 httpServer.listen(3000, handleListen);

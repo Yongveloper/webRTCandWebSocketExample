@@ -5,7 +5,7 @@ const muteBtn = document.getElementById('mute');
 const cameraBtn = document.getElementById('camera');
 const mirrorBtn = document.getElementById('mirror');
 const camerasSelect = document.getElementById('cameras');
-
+const peerFace = document.getElementById('peerFace');
 const call = document.getElementById('call');
 
 call.hidden = true;
@@ -14,6 +14,7 @@ let myStream;
 let muted = false;
 let cameraOff = false;
 let mirrored = false;
+let peerMirrored = false;
 let roomName = '';
 let myPeerConnection;
 let myDataChannel;
@@ -111,6 +112,7 @@ const handleMirrorClick = () => {
     mirrorBtn.innerText = 'Mirror Mode On';
     mirrored = true;
   }
+  socket.emit('mirror_mode', roomName);
 };
 
 muteBtn.addEventListener('click', handleMuteBtnClick);
@@ -142,6 +144,16 @@ const handleWelcomeSubmit = async (event) => {
 welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 
 // Socket code
+
+socket.on('mirror_mode', () => {
+  if (peerMirrored) {
+    peerFace.style.transform = 'rotateY(0deg)';
+    peerMirrored = false;
+  } else {
+    peerFace.style.transform = 'rotateY(180deg)';
+    peerMirrored = true;
+  }
+});
 
 // 주체에서 실행되는 코드
 socket.on('welcome', async () => {
