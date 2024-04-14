@@ -15,6 +15,7 @@ let muted = false;
 let cameraOff = false;
 let mirrored = false;
 let roomName = '';
+let myPeerConnection;
 
 const getCameras = async () => {
   try {
@@ -114,10 +115,11 @@ mirrorBtn.addEventListener('click', handleMirrorClick);
 const welcome = document.getElementById('welcome');
 const welcomeForm = welcome.querySelector('form');
 
-const startMedia = () => {
+const startMedia = async () => {
   welcome.hidden = true;
   call.hidden = false;
-  getMedia();
+  await getMedia();
+  makeConnection();
 };
 
 const handleWelcomeSubmit = (event) => {
@@ -132,6 +134,22 @@ welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 
 // Socket code
 
-socket.on('welcome', () => {
-  console.log('someone joined');
+// 주체에서 실행
+socket.on('welcome', async () => {
+  const offer = await myPeerConnection.createOffer();
+  myPeerConnection.setLocalDescription(offer);
+  socket.emit('offer', offer, roomName);
 });
+
+// 입장주체에서 실행
+socket.on('offer', (offer) => {
+  console.log(offer);
+});
+
+// RTC Code
+const makeConnection = () => {
+  myPeerConnection = new RTCPeerConnection();
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+};
